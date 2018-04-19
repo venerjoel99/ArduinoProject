@@ -1,0 +1,15 @@
+First line:
+In "New game! Get ready[]"
+!=No wires
+!!=Red wire
+!!!=White wire
+!!!!=Blue wire
+
+Second line: The button code
+Note: Buttons are 1,2,3,4,5,6 left to right
+
+Third line:
+Start!!! = Lowest knob setting
+Begin!! = Highest knob settiing
+Btw, the code is [] = Turn the knob until voltage reading matches bracket
+
