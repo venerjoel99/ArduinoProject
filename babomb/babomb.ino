@@ -25,6 +25,11 @@ int error = 10;
 
 //Speaker pin
 int speaker = 0;
+int freq = 500;
+
+//Time limit
+int seconds = 60;
+int limit = seconds * 1000;
 
 /**
  * Return an output based on button pressed
@@ -90,6 +95,7 @@ void loop() {
   int wire = 3;
   int knob = 2;
   int codeProgress = 1;
+  int runtime = 0;
 
   //Loop the game and print timer
   while (!gameOver){
@@ -98,6 +104,12 @@ void loop() {
     int knobVal = turnKnob();
     int wireVal = removeWire();
     int buttonVal = pressButton();
+
+    //Game is over if time runs out
+    runtime += buttonWait;
+    if (runtime >= limit){
+      gameOver = true;
+    }
 
     //Handle knob input
     progress[0] = knobVal==knob;
@@ -137,12 +149,13 @@ void loop() {
 
   //If user loses, KABOOM!
   if (!won){
-    tone(speaker, 500);
+    tone(speaker, freq);
     delay(1000);
     noTone(speaker);
   }
 
   int knobVal = turnKnob();
+  int wireVal = removeWire();
   int num = 0;
 
   //Wait until potentiometer is reset before game restarts
@@ -150,8 +163,9 @@ void loop() {
   for (int i = 0; i < 3; i++){
     digitalWrite(led[i], LOW);
   }
-  while(knobVal!=0){
+  while(knobVal != 0 || wireVal != 0){
     knobVal = turnKnob();
+    wireVal = removeWire();
     digitalWrite(led[num], LOW);
     num = (num + 1) % 3;
     digitalWrite(led[num], HIGH);
