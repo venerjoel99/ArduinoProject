@@ -62,8 +62,6 @@ int removeWire(){
  */
 int turnKnob(){
   int val = analogRead(potentiometer);
-  //User has not moved
-  //if (abs(val - analogVal) < error && !touched) return -1;
   if (val < lowMax) return 1;
   else if (val > highMin) return 2;
   else return 0;
@@ -80,48 +78,7 @@ void setup() {
   for (int i = firstButton; i < firstButton + buttons; i++){
     pinMode(i, INPUT);
   }
-  
-  // put your setup code here, to run once:
-  Serial.begin(9600);
-  //Serial.println("To initialize, turn potentiometer randomly the next three seconds");
-  //delay(3000);
-  //Serial.println("Stop now");
-  //delay(2000);
-  //Serial.println("Setting up");
-
-  //If the random number is not seeded properly,
-  //the same exact random numbers will be generated.
-  analogVal = analogRead(potentiometer);
-  randomSeed(analogVal);
 }
-
-//Hardware and software test loop
-/*
-void loop(){
-  int knobTarget = 500;
-  int knobVal = turnKnob();
-  int wireVal = removeWire();
-  int buttonVal = pressButton();
-  
-  if (true){
-    Serial.println("Knob");
-    Serial.println(knobVal);  
-  }
-  digitalWrite(led[0],knobVal==2 ? HIGH : LOW);
-  digitalWrite(led[1], wireVal==3 ? HIGH : LOW);
-  digitalWrite(led[2], buttonVal==6 ? HIGH : LOW);
-  
-  if (wireVal>-199){
-    Serial.println("Wires");
-    Serial.println(wireVal);
-  }
-  
-  if (buttonVal!= 0){
-    Serial.println("Buttons");
-    Serial.println(buttonVal);
-  }
-}
-*/
 
 void loop() {
   // Set game states variables
@@ -129,43 +86,11 @@ void loop() {
   bool won = false;
   bool progress[] = { false, false, false };
   
-  // Set random prompts for player
-  int wire = random(4);
-  int knob = random(2) + 1;
-  int code[3];
-  int codeProgress = 0;
-  for (int i = 0; i < 3; i++){
-    code[i] = random(buttons) + 1;
-  }
+  // Set the prompts for player
+  int wire = 3;
+  int knob = 2;
+  int codeProgress = 1;
 
-  //Set the potentiometer to untouched state
-  //analogVal = analogRead(potentiometer);
-  //touched = false;
-
-  //Print the user prompts
-  //TODO: Come up with better riddles and stuff and put them in a manual
-  //Print the wire hint
-  String signs = "";
-  for (int i = 0; i < wire; i++){
-    signs += '!';
-  }
-  Serial.println("New game! Get ready!" + signs);
-  //Print the three-digit button code
-  for (int i = 0; i < 3; i++){
-    Serial.print(code[i]);
-  }
-  Serial.println("");
-  //Print the knob turning hint
-  switch(knob){
-    case 1:
-      Serial.println("Start!!!");
-    case 2:
-      Serial.println("Begin!!");
-    default:
-      Serial.println("Something's wrong with the code");
-  }
-
-  
   //Loop the game and print timer
   while (!gameOver){
 
@@ -175,36 +100,25 @@ void loop() {
     int buttonVal = pressButton();
 
     //Handle knob input
-    if (!progress[0] && knobVal==knob){
-      progress[0] = true;
-    }
-    else if (knobVal!=0){
-      Serial.println("Incorrect knob setting");
+    progress[0] = knobVal==knob;
+    if (knobVal!=0 && !progress[0]){
       gameOver = true;
     }
 
     //Handle wire input
-    if (wireVal<0){
-      Serial.println("Too many wires removed");
+    progress[1] = wireVal==wire;
+    if (wireVal!=0 && !progress[1]){
       gameOver = true;
     }
-    else if (!progress[1] && wireVal==wire){
-      progress[1] = true;
-    }
-    else if (wireVal!=0){
-      Serial.println("Wrong wire");
-      gameOver = true;
-    }
-
+    
     //Handle button input
-    if (codeProgress < 3 && buttonVal==code[codeProgress]){
+    if (codeProgress <= buttons && buttonVal==codeProgress){
       codeProgress++;
     }
     else if (buttonVal != 0){
-      Serial.println("Wrong button");
       gameOver = true;
     }
-    if (!progress[2] && codeProgress >=3){
+    if (!progress[2] && codeProgress > buttons){
       progress[2] = true;
     }
 
@@ -216,26 +130,33 @@ void loop() {
     
     //Check for win
     won = progress[0] && progress[1] && progress[2];
-    gameOver = won;
-    
+    if (won){
+      gameOver = won;
+    }
   }
 
   //If user loses, KABOOM!
   if (!won){
-    //Serial.println("KABOOM!!!!");
     tone(speaker, 500);
     delay(1000);
     noTone(speaker);
   }
 
-  //Tell user the result
-  String result = won ? "won!" : "lost!";
-  bool restart = false;
-  Serial.println("You " + result);
-  Serial.println("Set potentiometer to middle and press the first button to restart");
+  int knobVal = turnKnob();
+  int num = 0;
 
-  //Wait for user to press restart button, which would be button # 1(pin 8)
-  while (!restart){
-    restart = digitalRead(firstButton)==HIGH;
+  //Wait until potentiometer is reset before game restarts
+  //Indicate game is not reset by elevator pattern lights
+  for (int i = 0; i < 3; i++){
+    digitalWrite(led[i], LOW);
   }
+  while(knobVal!=0){
+    knobVal = turnKnob();
+    digitalWrite(led[num], LOW);
+    num = (num + 1) % 3;
+    digitalWrite(led[num], HIGH);
+    delay(500);
+  }
+  
+  //Code loops back to start; restarting the game again.
 }
