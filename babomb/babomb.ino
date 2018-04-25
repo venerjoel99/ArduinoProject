@@ -8,7 +8,7 @@ int blue = 7;
 //Digital pins for LEDs
 int led[] = {2,3,4};
 
-//Analog pin for the potentiometer
+//Potentiometer analog pin and settings
 int potentiometer = 0;
 int lowMax = 300;
 int highMin = 800;
@@ -17,11 +17,6 @@ int highMin = 800;
 int buttons = 6;
 int firstButton = 8;
 int buttonWait = 200;
-
-//Potentiometer settings
-int analogVal = -1;
-int error = 10;
-//bool touched = false;
 
 //Speaker pin
 int speaker = 0;
