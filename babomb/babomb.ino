@@ -1,3 +1,4 @@
+#include <Time.h>
 //Breadboard configuration
 
 //Digital pins for the wires
@@ -25,11 +26,10 @@ int error = 10;
 
 //Speaker pin
 int speaker = 0;
-int freq = 500;
+int freq = 80;
 
 //Time limit
 int seconds = 60;
-int limit = seconds * 1000;
 int lightDelay = 500;
 
 /**
@@ -84,6 +84,10 @@ void setup() {
   for (int i = firstButton; i < firstButton + buttons; i++){
     pinMode(i, INPUT);
   }
+  tone(speaker, freq);
+  delay(500);
+  noTone(speaker);
+  //Serial.begin(9600);
 }
 
 void loop() {
@@ -97,18 +101,19 @@ void loop() {
   int knob = 2;
   int codeProgress = 1;
   int runtime = 0;
+  int iterations = 0;
 
   //Loop the game and print timer
   while (!gameOver){
-
     //Read the arduino for inputs
     int knobVal = turnKnob();
     int wireVal = removeWire();
     int buttonVal = pressButton();
 
     //Game is over if time runs out
-    runtime += buttonWait;
-    if (runtime >= limit){
+    delay(200);
+    iterations++;
+    if (iterations / 5 >= seconds){
       gameOver = true;
     }
 
@@ -150,8 +155,25 @@ void loop() {
 
   //If user loses, KABOOM!
   if (!won){
+    for (int i = 0; i < 4; i++){
+      for (int i = freq; i < freq + 200; i++){
+        tone(speaker, i);
+        delay(1);
+      }
+      for (int i = freq + 200; i > freq; i--){
+        tone(speaker, i);
+        delay(1);
+      }
+    }
+    noTone(speaker);
+  }
+  else {
     tone(speaker, freq);
-    delay(1000);
+    delay(300);
+    noTone(speaker);
+    delay(300);
+    tone(speaker, freq * 2);
+    delay(300);
     noTone(speaker);
   }
 
