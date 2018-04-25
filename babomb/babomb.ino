@@ -30,6 +30,7 @@ int freq = 500;
 //Time limit
 int seconds = 60;
 int limit = seconds * 1000;
+int lightDelay = 500;
 
 /**
  * Return an output based on button pressed
@@ -157,19 +158,32 @@ void loop() {
   int knobVal = turnKnob();
   int wireVal = removeWire();
   int num = 0;
+  bool pressed = false;
 
-  //Wait until potentiometer is reset before game restarts
-  //Indicate game is not reset by elevator pattern lights
+  //First turn off all progress lights
+  //Indicate game is not reset by elevator pattern lights during while loops
   for (int i = 0; i < 3; i++){
     digitalWrite(led[i], LOW);
   }
+
+  //Wait until potentiometer and wires are reset
   while(knobVal != 0 || wireVal != 0){
     knobVal = turnKnob();
     wireVal = removeWire();
     digitalWrite(led[num], LOW);
     num = (num + 1) % 3;
     digitalWrite(led[num], HIGH);
-    delay(500);
+    delay(lightDelay);
+  }
+
+  //Then wait for the player to press the first button to restart
+  while (!pressed){
+    int val = pressButton();
+    pressed = val==1;
+    digitalWrite(led[num], LOW);
+    num = (num + 1) % 3;
+    digitalWrite(led[num], HIGH);
+    delay(lightDelay - buttonWait);
   }
   
   //Code loops back to start; restarting the game again.
