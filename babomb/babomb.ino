@@ -1,4 +1,3 @@
-#include <Time.h>
 //Breadboard configuration
 
 //Digital pins for the wires
@@ -84,10 +83,11 @@ void setup() {
   for (int i = firstButton; i < firstButton + buttons; i++){
     pinMode(i, INPUT);
   }
+
+  //Speaker test
   tone(speaker, freq);
   delay(500);
   noTone(speaker);
-  //Serial.begin(9600);
 }
 
 void loop() {
@@ -103,7 +103,7 @@ void loop() {
   int runtime = 0;
   int iterations = 0;
 
-  //Loop the game and print timer
+  //Loop the game
   while (!gameOver){
     //Read the arduino for inputs
     int knobVal = turnKnob();
@@ -111,6 +111,7 @@ void loop() {
     int buttonVal = pressButton();
 
     //Game is over if time runs out
+    //Time limit as of now is 60 seconds
     delay(200);
     iterations++;
     if (iterations / 5 >= seconds){
@@ -139,7 +140,6 @@ void loop() {
     if (!progress[2] && codeProgress > buttons){
       progress[2] = true;
     }
-
   
     //Turn on LEDs for progress  
     for (int i = 0; i < 3; i++){
@@ -167,6 +167,7 @@ void loop() {
     }
     noTone(speaker);
   }
+  //If user wins, speaker beeps!
   else {
     tone(speaker, freq);
     delay(300);
